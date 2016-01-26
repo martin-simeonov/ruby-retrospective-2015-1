@@ -94,24 +94,22 @@ module DrunkenMathematician
 
   def meaningless(n)
     sequence = RationalSequence.new(n)
-    first_group = sequence.select { |n| n.numerator.prime? or n.denominator.prime? }
-    second_group = sequence.to_a - first_group
-    first_group.reduce(1, :*) / second_group.reduce(1, :*)
+    prime, non_prime = sequence.partition { |n| n.numerator.prime? or n.denominator.prime? }
+    prime.reduce(1, :*) / non_prime.reduce(1, :*)
   end
 
   def aimless(n)
     sequence = PrimeSequence.new(n)
-    pairs = Array.new
-    sequence.each_slice(2) { |slice| pairs << Rational(slice[0], (slice[1] or 1)) }
-    pairs.reduce(0, :+)
+    sequence.each_slice(2).map { |a, b| Rational(a, (b or 1)) }.reduce(0, :+)
   end
 
   def worthless(n)
     fibonacci_limit = FibonacciSequence.new(n).to_a.last
     fibonacci_limit ||= 0
-    sequence = RationalSequence.new(Float::INFINITY)
+
     sum = 0
-    sequence.take_while do |n|
+
+    RationalSequence.new(fibonacci_limit**2).take_while do |n|
       sum += n
       sum <= fibonacci_limit
     end
