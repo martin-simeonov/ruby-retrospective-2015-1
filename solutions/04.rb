@@ -118,12 +118,10 @@ class BeloteDeck < Deck
     end
 
     def belote?
-      cards = @deal.select { |card| card.rank == :queen or card.rank == :king}
-      return true if cards.select { |card| card.suit == :clubs }.size == 2
-      return true if cards.select { |card| card.suit == :diamonds }.size == 2
-      return true if cards.select { |card| card.suit == :hearts }.size == 2
-      return true if cards.select { |card| card.suit == :spades }.size == 2
-      false
+      Deck::SUITS.any? do |suit|
+        intersection = @deal & [Card.new(:king, suit), Card.new(:queen, suit)]
+        intersection.size == 2
+      end
     end
 
     def tierce?
