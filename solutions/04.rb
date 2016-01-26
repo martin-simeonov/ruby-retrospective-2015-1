@@ -38,17 +38,17 @@ class Card
   end
 end
 
-class Deal
-  def initialize(deal)
-    @deal = deal
-  end
-
-  def size
-    @deal.size
-  end
-end
-
 class Deck
+  class Deal
+    def initialize(deal)
+      @deal = deal
+    end
+
+    def size
+      @deal.size
+    end
+  end
+
   include Enumerable
 
   def initialize(deck = Array.new)
@@ -114,101 +114,101 @@ class Deck
   end
 end
 
-class WarDeal < Deal
-  def play_card
-    play_card = @deal.sample
-    @deal.delete_if { |card| card == play_card }
-  end
-
-  def allow_face_up?
-    size <= 3
-  end
-end
-
 class WarDeck < Deck
+  class WarDeal < Deck::Deal
+    def play_card
+      play_card = @deal.sample
+      @deal.delete_if { |card| card == play_card }
+    end
+
+    def allow_face_up?
+      size <= 3
+    end
+  end
+
   def deal
     WarDeal.new(@deck.shift(26))
   end
 end
 
-class BeloteDeal < Deal
-  def initialize(deal)
-    super(deal)
-    @ranks = {:jack => 10, :queen => 11, :king => 12, 10 => 13, :ace => 14}
-  end
-
-  def highest_of_suit(suit)
-    cards_of_suit = @deal.select { |card| card.suit == suit }
-    cards_of_suit.sort_by { |card| @ranks.fetch(card.rank, card.rank) }.last
-  end
-
-  def belote?
-    cards = @deal.select { |card| card.rank == :queen or card.rank == :king}
-    return true if cards.select { |card| card.suit == :clubs }.size == 2
-    return true if cards.select { |card| card.suit == :diamonds }.size == 2
-    return true if cards.select { |card| card.suit == :hearts }.size == 2
-    return true if cards.select { |card| card.suit == :spades }.size == 2
-    false
-  end
-
-  def tierce?
-    @deal.sort_by! { |card| [card.suit, @ranks.fetch(card.rank, card.rank)] }
-    suits = @deal.group_by(&:suit)
-    suits.each_value { |suit| return true if find_consecutive(suit, 3)}
-    false
-  end
-
-  def quarte?
-    @deal.sort_by! { |card| [card.suit, @ranks.fetch(card.rank, card.rank)] }
-    suits = @deal.group_by(&:suit)
-    suits.each_value { |suit| return true if find_consecutive(suit, 4)}
-    false
-  end
-
-  def quint?
-    @deal.sort_by! { |card| [card.suit, @ranks.fetch(card.rank, card.rank)] }
-    suits = @deal.group_by(&:suit)
-    suits.each_value { |suit| return true if find_consecutive(suit, 5)}
-    false
-  end
-
-  def carre_of_jacks?
-    carre?(:jack)
-  end
-
-  def carre_of_nines?
-    carre?(9)
-  end
-
-  def carre_of_aces?
-    carre?(:ace)
-  end
-
-  private
-
-  def carre?(rank)
-    @deal.select { |card| card.rank == rank }.size == 4
-  end
-
-  def find_consecutive(cards, number)
-    correct = 0
-    ranks = cards.map { |card| @ranks.fetch(card.rank, card.rank) }
-    expected = ranks.first
-    ranks.each do |rank|
-      if expected == rank
-        correct += 1
-      else
-        correct = 0
-        expected = expected.next
-      end
-      expected = expected.next
-      return true if correct == number
-    end
-    false
-  end
-end
-
 class BeloteDeck < Deck
+  class BeloteDeal < Deck::Deal
+    def initialize(deal)
+      super(deal)
+      @ranks = {:jack => 10, :queen => 11, :king => 12, 10 => 13, :ace => 14}
+    end
+
+    def highest_of_suit(suit)
+      cards_of_suit = @deal.select { |card| card.suit == suit }
+      cards_of_suit.sort_by { |card| @ranks.fetch(card.rank, card.rank) }.last
+    end
+
+    def belote?
+      cards = @deal.select { |card| card.rank == :queen or card.rank == :king}
+      return true if cards.select { |card| card.suit == :clubs }.size == 2
+      return true if cards.select { |card| card.suit == :diamonds }.size == 2
+      return true if cards.select { |card| card.suit == :hearts }.size == 2
+      return true if cards.select { |card| card.suit == :spades }.size == 2
+      false
+    end
+
+    def tierce?
+      @deal.sort_by! { |card| [card.suit, @ranks.fetch(card.rank, card.rank)] }
+      suits = @deal.group_by(&:suit)
+      suits.each_value { |suit| return true if find_consecutive(suit, 3)}
+      false
+    end
+
+    def quarte?
+      @deal.sort_by! { |card| [card.suit, @ranks.fetch(card.rank, card.rank)] }
+      suits = @deal.group_by(&:suit)
+      suits.each_value { |suit| return true if find_consecutive(suit, 4)}
+      false
+    end
+
+    def quint?
+      @deal.sort_by! { |card| [card.suit, @ranks.fetch(card.rank, card.rank)] }
+      suits = @deal.group_by(&:suit)
+      suits.each_value { |suit| return true if find_consecutive(suit, 5)}
+      false
+    end
+
+    def carre_of_jacks?
+      carre?(:jack)
+    end
+
+    def carre_of_nines?
+      carre?(9)
+    end
+
+    def carre_of_aces?
+      carre?(:ace)
+    end
+
+    private
+
+    def carre?(rank)
+      @deal.select { |card| card.rank == rank }.size == 4
+    end
+
+    def find_consecutive(cards, number)
+      correct = 0
+      ranks = cards.map { |card| @ranks.fetch(card.rank, card.rank) }
+      expected = ranks.first
+      ranks.each do |rank|
+        if expected == rank
+          correct += 1
+        else
+          correct = 0
+          expected = expected.next
+        end
+        expected = expected.next
+        return true if correct == number
+      end
+      false
+    end
+  end
+
   def initialize(deck = Array.new)
     @deck = deck
     if(@deck.empty?)
@@ -229,32 +229,32 @@ class BeloteDeck < Deck
   end
 end
 
-class SixtySixDeal < Deal
-  def twenty?(trump_suit)
-    suits = @deal.group_by(&:suit)
-    suits.delete(trump_suit)
-    suits.each_value do |cards|
-      queen = cards.any? { |card| card.rank == :queen }
-      king = cards.any? { |card| card.rank == :king }
-
-      return true if queen and king
-    end
-    false
-  end
-
-  def forty?(trump_suit)
-    suits = @deal.group_by(&:suit)
-    suits.each do |suit, cards|
-      queen = cards.any? { |card| card.rank == :queen }
-      king = cards.any? { |card| card.rank == :king }
-
-      return true if (queen and king) and trump_suit == suit
-    end
-    false
-  end
-end
-
 class SixtySixDeck < BeloteDeck
+  class SixtySixDeal < Deck::Deal
+    def twenty?(trump_suit)
+      suits = @deal.group_by(&:suit)
+      suits.delete(trump_suit)
+      suits.each_value do |cards|
+        queen = cards.any? { |card| card.rank == :queen }
+        king = cards.any? { |card| card.rank == :king }
+
+        return true if queen and king
+      end
+      false
+    end
+
+    def forty?(trump_suit)
+      suits = @deal.group_by(&:suit)
+      suits.each do |suit, cards|
+        queen = cards.any? { |card| card.rank == :queen }
+        king = cards.any? { |card| card.rank == :king }
+
+        return true if (queen and king) and trump_suit == suit
+      end
+      false
+    end
+  end
+
   def initialize(deck = Array.new)
     @deck = deck
     if(@deck.empty?)
