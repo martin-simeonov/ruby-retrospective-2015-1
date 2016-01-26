@@ -60,9 +60,7 @@ class Deck
   end
 
   def to_s
-    string_deck = ""
-    @deck.each { |card| string_deck += card.to_s + "\n" }
-    string_deck
+    @deck.map(&:to_s).join("\n")
   end
 
   def sort
@@ -201,15 +199,11 @@ class SixtySixDeck < Deck
     INITIAL_SIZE = 6
 
     def twenty?(trump_suit)
-      suits = @deal.group_by(&:suit)
-      suits.delete(trump_suit)
-      suits.each_value do |cards|
-        queen = cards.any? { |card| card.rank == :queen }
-        king = cards.any? { |card| card.rank == :king }
-
-        return true if queen and king
+      suits = Deck::SUITS - [trump_suit]
+      suits.any? do |suit|
+        intersection = @deal & [Card.new(:king, suit), Card.new(:queen, suit)])
+        intersection.size == 2
       end
-      false
     end
 
     def forty?(trump_suit)
