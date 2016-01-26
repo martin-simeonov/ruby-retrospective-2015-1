@@ -51,17 +51,12 @@ class PrimeSequence
     @limit = limit
   end
 
-  def each
-    number = 2
-    count = 0
-
-    while count < @limit
-      if number.prime?
-        yield number
-        count += 1
-      end
-      number += 1
-    end
+  def each(&block)
+    (1..Float::INFINITY).to_enum.
+      lazy.
+      select { |number| number.prime? }.
+      take(@limit).
+      each(&block)
   end
 end
 
