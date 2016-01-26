@@ -39,8 +39,9 @@ class Card
 end
 
 class Deck
-
   class Deal
+    INITIAL_SIZE = 26
+
     def initialize(deal)
       @deal = deal
     end
@@ -121,12 +122,14 @@ class WarDeck < Deck
   end
 
   def deal
-    WarDeal.new(@deck.shift(26))
+    WarDeal.new(@deck.shift(WarDeal::INITIAL_SIZE))
   end
 end
 
 class BeloteDeck < Deck
   class BeloteDeal < Deck::Deal
+    INITIAL_SIZE = 8
+
     def initialize(deal)
       super(deal)
       @ranks = {:jack => 10, :queen => 11, :king => 12, 10 => 13, :ace => 14}
@@ -217,12 +220,14 @@ class BeloteDeck < Deck
   end
 
   def deal
-    BeloteDeal.new(@deck.shift(8))
+    BeloteDeal.new(@deck.shift(BeloteDeal::INITIAL_SIZE))
   end
 end
 
 class SixtySixDeck < Deck
   class SixtySixDeal < Deck::Deal
+    INITIAL_SIZE = 6
+
     def twenty?(trump_suit)
       suits = @deal.group_by(&:suit)
       suits.delete(trump_suit)
@@ -261,6 +266,6 @@ class SixtySixDeck < Deck
   end
 
   def deal
-    SixtySixDeal.new(@deck.shift(6))
+    SixtySixDeal.new(@deck.shift(SixtySixDeal::INITIAL_SIZE))
   end
 end
