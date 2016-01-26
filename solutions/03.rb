@@ -69,14 +69,21 @@ class FibonacciSequence
     @second = second
   end
 
-  def each
+  def each(&block)
+    enum_for(:generate_fibonacci_numbers).
+      lazy.
+      take(@limit).
+      each(&block)
+  end
+
+  private
+
+  def generate_fibonacci_numbers
     previous = @first
     current = @second
-    count = 0
 
-    while count < @limit
+    loop do
       yield previous
-      count += 1
       current, previous = current + previous, current
     end
   end
