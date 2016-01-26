@@ -4,7 +4,7 @@ def new_head(snake, direction)
 end
 
 def move(snake, direction)
-  grow(snake.drop(1), direction)
+  grow(snake, direction).drop(1)
 end
 
 def grow(snake, direction)
