@@ -107,14 +107,9 @@ class BeloteDeck < Deck
   class BeloteDeal < Deck::Deal
     INITIAL_SIZE = 8
 
-    def initialize(deal)
-      super(deal)
-      @ranks = {:jack => 10, :queen => 11, :king => 12, 10 => 13, :ace => 14}
-    end
-
     def highest_of_suit(suit)
       cards_of_suit = @deal.select { |card| card.suit == suit }
-      cards_of_suit.sort_by { |card| @ranks.fetch(card.rank, card.rank) }.last
+      cards_of_suit.sort_by { |card| RANKS.find_index(card.rank) }.last
     end
 
     def belote?
@@ -125,24 +120,15 @@ class BeloteDeck < Deck
     end
 
     def tierce?
-      @deal.sort_by! { |card| [card.suit, @ranks.fetch(card.rank, card.rank)] }
-      suits = @deal.group_by(&:suit)
-      suits.each_value { |suit| return true if find_consecutive(suit, 3)}
-      false
+      find_consecutive(3)
     end
 
     def quarte?
-      @deal.sort_by! { |card| [card.suit, @ranks.fetch(card.rank, card.rank)] }
-      suits = @deal.group_by(&:suit)
-      suits.each_value { |suit| return true if find_consecutive(suit, 4)}
-      false
+      find_consecutive(4)
     end
 
     def quint?
-      @deal.sort_by! { |card| [card.suit, @ranks.fetch(card.rank, card.rank)] }
-      suits = @deal.group_by(&:suit)
-      suits.each_value { |suit| return true if find_consecutive(suit, 5)}
-      false
+      find_consecutive(5)
     end
 
     def carre_of_jacks?
@@ -163,21 +149,19 @@ class BeloteDeck < Deck
       @deal.select { |card| card.rank == rank }.size == 4
     end
 
-    def find_consecutive(cards, number)
-      correct = 0
-      ranks = cards.map { |card| @ranks.fetch(card.rank, card.rank) }
-      expected = ranks.first
-      ranks.each do |rank|
-        if expected == rank
-          correct += 1
-        else
-          correct = 0
-          expected = expected.next
-        end
-        expected = expected.next
-        return true if correct == number
+    def find_consecutive(number)
+      cards = @deal.sort_by { |card| RANKS.find_index(card.rank) }
+      Deck::SUITS.any? do |suit|
+        cards.select { |card| card.suit == suit }.
+          each_cons(number).
+          any? { |piece| consecutive_ranks?(piece) }
       end
-      false
+    end
+
+    def consecutive_ranks?(cards)
+      cards.each_cons(2).all? do |first, second|
+        RANKS.index(first.rank) == RANKS.index(second.rank) - 1
+      end
     end
   end
 
