@@ -13,17 +13,6 @@ class RationalSequence
     @limit = limit
   end
 
-  def next_rational(numerator, denominator)
-    if numerator % 2 == denominator % 2
-       numerator += 1
-       denominator -= 1 if denominator > 1
-    else
-       denominator += 1
-       numerator -= 1 if numerator > 1
-    end
-    [numerator, denominator]
-  end
-
   def each
     numerator = denominator = 1
     count = 0
@@ -35,6 +24,19 @@ class RationalSequence
       end
       numerator, denominator = next_rational(numerator, denominator)
     end
+  end
+
+  private
+
+  def next_rational(numerator, denominator)
+    if numerator % 2 == denominator % 2
+       numerator += 1
+       denominator -= 1 if denominator > 1
+    else
+       denominator += 1
+       numerator -= 1 if numerator > 1
+    end
+    [numerator, denominator]
   end
 end
 
