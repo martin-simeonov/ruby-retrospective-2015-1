@@ -39,6 +39,7 @@ class Card
 end
 
 class Deck
+
   class Deal
     def initialize(deal)
       @deal = deal
@@ -51,11 +52,14 @@ class Deck
 
   include Enumerable
 
-  def initialize(deck = Array.new)
+  SUITS = [:spades, :hearts, :diamonds, :clubs]
+  RANKS = [:ace, :king, :queen, :jack] + (2..10).to_a.reverse
+
+  def initialize(deck = Array.new, ranks = RANKS)
+    @ranks = ranks
     @deck = deck
     if @deck.empty?
-      ranks = [:ace, :king, :queen, :jack] + (2..10).to_a.reverse
-      generate_deck(ranks)
+      @deck = SUITS.product(@ranks).map { |suit, rank| Card.new(rank, suit) }
     end
   end
 
@@ -101,16 +105,6 @@ class Deck
 
   def deal
     Deal.new(@deck)
-  end
-
-  private
-
-  def generate_deck(ranks)
-    suits = [:spades, :hearts, :diamonds, :clubs]
-
-    suits.each do |suit|
-      ranks.each { |rank| @deck << Card.new(rank, suit) }
-    end
   end
 end
 
@@ -209,12 +203,10 @@ class BeloteDeck < Deck
     end
   end
 
+  RANKS = [:ace, 10, :king, :queen, :jack, 9, 8, 7]
+
   def initialize(deck = Array.new)
-    @deck = deck
-    if(@deck.empty?)
-      ranks = [:ace, 10, :king, :queen, :jack, 9, 8, 7]
-      generate_deck(ranks)
-    end
+    super(deck, RANKS)
   end
 
   def sort
@@ -229,7 +221,7 @@ class BeloteDeck < Deck
   end
 end
 
-class SixtySixDeck < BeloteDeck
+class SixtySixDeck < Deck
   class SixtySixDeal < Deck::Deal
     def twenty?(trump_suit)
       suits = @deal.group_by(&:suit)
@@ -255,12 +247,17 @@ class SixtySixDeck < BeloteDeck
     end
   end
 
+  RANKS = [:ace, 10, :king, :queen, :jack, 9]
+
   def initialize(deck = Array.new)
-    @deck = deck
-    if(@deck.empty?)
-      ranks = [:ace, 10, :king, :queen, :jack, 9]
-      generate_deck(ranks)
-    end
+    super(deck, RANKS)
+  end
+
+  def sort
+    ranks = {:jack => 10, :queen => 11, :king => 12, 10 => 13, :ace => 14}
+
+    @deck.sort_by! { |card| [card.suit, ranks.fetch(card.rank, card.rank)] }
+    @deck.reverse!
   end
 
   def deal
