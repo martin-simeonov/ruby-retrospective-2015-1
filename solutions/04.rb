@@ -199,22 +199,20 @@ class SixtySixDeck < Deck
     INITIAL_SIZE = 6
 
     def twenty?(trump_suit)
-      suits = Deck::SUITS - [trump_suit]
-      suits.any? do |suit|
-        intersection = @deal & [Card.new(:king, suit), Card.new(:queen, suit)])
-        intersection.size == 2
-      end
+      has_queen_and_king?(Deck::SUITS - [trump_suit])
     end
 
     def forty?(trump_suit)
-      suits = @deal.group_by(&:suit)
-      suits.each do |suit, cards|
-        queen = cards.any? { |card| card.rank == :queen }
-        king = cards.any? { |card| card.rank == :king }
+      has_queen_and_king?(trump_suit)
+    end
 
-        return true if (queen and king) and trump_suit == suit
+    private
+
+    def has_queen_and_king?(suits)
+      suits.any? do |suit|
+        intersection = @deal & [Card.new(:king, suit), Card.new(:queen, suit)]
+        intersection.size == 2
       end
-      false
     end
   end
 
