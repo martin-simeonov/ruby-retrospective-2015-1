@@ -13,20 +13,24 @@ class RationalSequence
     @limit = limit
   end
 
-  def each
-    numerator = denominator = 1
-    count = 0
-
-    while count < @limit
-      if numerator.gcd(denominator) == 1
-        yield Rational(numerator, denominator)
-        count += 1
-      end
-      numerator, denominator = next_rational(numerator, denominator)
-    end
+  def each(&block)
+    enum_for(:generate_rationals).
+      lazy.
+      select { |numerator, denominator| numerator.gcd(denominator) == 1 }.
+      map { |numerator, denominator| Rational(numerator, denominator) }.
+      take(@limit).
+      each(&block)
   end
 
   private
+
+  def generate_rationals
+    numerator = denominator = 1
+    loop do
+      yield [numerator, denominator]
+      numerator, denominator = next_rational(numerator, denominator)
+    end
+  end
 
   def next_rational(numerator, denominator)
     if numerator % 2 == denominator % 2
