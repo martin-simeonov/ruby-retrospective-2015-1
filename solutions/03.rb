@@ -1,7 +1,7 @@
 class Integer
   def prime?
     return false if self == 1
-    (2..self/2).each { |number| return false if (self % number) == 0 }
+    (2..self**0.5).each { |number| return false if (self % number) == 0 }
     true
   end
 end
