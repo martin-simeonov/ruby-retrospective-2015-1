@@ -20,11 +20,18 @@ end
 
 def obstacle_ahead?(snake, direction, dimensions)
   next_step = new_head(snake, direction)
-  snake.include?(next_step) or
-    next_step[0] == dimensions[:width] or
-      next_step[1] == dimensions[:height] or
-        next_step[0] < 0 or
-          next_step[1] < 0
+  body_ahead?(next_step, snake) or wall_ahead?(next_step, snake)
+end
+
+def body_ahead?(next_step, snake)
+  snake.include?(next_step)
+end
+
+def wall_ahead?(next_step, snake)
+  next_step[0] == dimensions[:width] or
+    next_step[1] == dimensions[:height] or
+      next_step[0] < 0 or
+        next_step[1] < 0
 end
 
 def danger?(snake, direction, dimensions)
