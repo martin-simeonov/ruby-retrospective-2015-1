@@ -1,40 +1,6 @@
-class Card
-  attr_reader :rank, :suit
-
-  def initialize(rank, suit)
-    @rank = rank
-    @suit = suit
-  end
-
+class Card < Struct.new(:rank, :suit)
   def to_s
-    "#{@rank.to_s.capitalize} of #{@suit.to_s.capitalize}"
-  end
-
-  def ==(other)
-    to_s == other.to_s
-  end
-
-  def <(other)
-    ranks = {jack: 11, queen: 12, king: 13, ace: 14}
-    suits = {clubs: 1, diamonds: 2, hearts: 3, spades: 4}
-
-    if suits[suit] < suits[other.suit]
-      true
-    elsif suits[suit] > suits[other.suit]
-      false
-    else
-      ranks.fetch(rank, rank) < ranks.fetch(other.rank, other.rank)
-    end
-  end
-
-  def >(other)
-    not (self < other or self == other)
-  end
-
-  def <=>(other)
-    return 0 if self == other
-    return -1 if self < other
-    return 1 if self > other
+    "#{rank.to_s.capitalize} of #{suit.to_s.capitalize}"
   end
 end
 
@@ -53,8 +19,8 @@ class Deck
 
   include Enumerable
 
-  SUITS = [:spades, :hearts, :diamonds, :clubs]
-  RANKS = [:ace, :king, :queen, :jack] + (2..10).to_a.reverse
+  SUITS = [:clubs, :diamonds, :hearts, :spades]
+  RANKS = [2, 3, 4, 5, 6, 7, 8, 9, 10, :jack, :queen, :king, :ace]
 
   def initialize(deck = Array.new, ranks = RANKS)
     @ranks = ranks
@@ -100,12 +66,25 @@ class Deck
   end
 
   def sort
-    @deck.sort! { |current, following| following <=> current }
-    self
+    @deck.sort_by! { |card| card_grade(card) }
+    @deck.reverse!
   end
 
   def deal
     Deal.new(@deck)
+  end
+
+  private
+
+  def card_grade(card)
+    suit_grade = SUITS.find_index(card.suit)
+    rank_grade = @ranks.find_index(card.rank)
+
+    suit_grade * @ranks.size + rank_grade
+  end
+
+  def compare_cards(card_one, card_two)
+    card_grade(card_one) <=> card_grade(card_two)
   end
 end
 
@@ -206,17 +185,10 @@ class BeloteDeck < Deck
     end
   end
 
-  RANKS = [:ace, 10, :king, :queen, :jack, 9, 8, 7]
+  RANKS = [7, 8, 9, :jack, :queen, :king, 10, :ace]
 
   def initialize(deck = Array.new)
     super(deck, RANKS)
-  end
-
-  def sort
-    ranks = {:jack => 10, :queen => 11, :king => 12, 10 => 13, :ace => 14}
-
-    @deck.sort_by! { |card| [card.suit, ranks.fetch(card.rank, card.rank)] }
-    @deck.reverse!
   end
 
   def deal
@@ -252,17 +224,10 @@ class SixtySixDeck < Deck
     end
   end
 
-  RANKS = [:ace, 10, :king, :queen, :jack, 9]
+  RANKS = [9, :jack, :queen, :king, 10, :ace]
 
   def initialize(deck = Array.new)
     super(deck, RANKS)
-  end
-
-  def sort
-    ranks = {:jack => 10, :queen => 11, :king => 12, 10 => 13, :ace => 14}
-
-    @deck.sort_by! { |card| [card.suit, ranks.fetch(card.rank, card.rank)] }
-    @deck.reverse!
   end
 
   def deal
