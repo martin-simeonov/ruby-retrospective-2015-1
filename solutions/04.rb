@@ -89,8 +89,8 @@ class Deck
   end
 
   def to_s
-    string_deck = Array.new
-    @deck.each { |card| string_deck << card.to_s }
+    string_deck = ""
+    @deck.each { |card| string_deck += card.to_s + "\n" }
     string_deck
   end
 
@@ -195,10 +195,16 @@ class BeloteDeal < Deal
     ranks = cards.map { |card| @ranks.fetch(card.rank, card.rank) }
     expected = ranks.first
     ranks.each do |rank|
-      expected == rank ? correct += 1 : break
+      if expected == rank
+        correct += 1
+      else
+        correct = 0
+        expected = expected.next
+      end
       expected = expected.next
+      return true if correct == number
     end
-    correct == number
+    false
   end
 end
 
